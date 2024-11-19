@@ -1,20 +1,21 @@
 import streamlit as st
+import time
 
-# Set the page configuration
+# Page Configuration
 st.set_page_config(page_title="सामना ढोल ताशा पथक लातूर", layout="wide")
 
-# Add custom CSS for Netflix-like UI and animations
+# Custom CSS for Animations and UI
 st.markdown("""
     <style>
         /* General Background */
         .main {
-            background-color: #121212; /* Netflix dark background */
-            color: #FFFFFF; /* Netflix white text */
+            background-color: #121212;
+            color: #FFFFFF;
         }
 
         /* Header Styling */
         .main-header {
-            background-color: #E50914; /* Netflix red */
+            background-color: #E50914;
             color: white;
             text-align: center;
             padding: 20px;
@@ -23,18 +24,17 @@ st.markdown("""
 
         /* Section Styling */
         .section {
-            background-color: #1f1f1f; /* Darker gray for section cards */
-            border: 1px solid #B3B3B3; /* Subtle border */
+            background-color: #1f1f1f;
+            border: 1px solid #B3B3B3;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
             transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
         }
 
-        /* Section Hover Effect */
         .section:hover {
-            transform: scale(1.02); /* Zoom effect */
-            background-color: #292929; /* Slightly brighter on hover */
+            transform: scale(1.02);
+            background-color: #292929;
         }
 
         /* Button Styling */
@@ -49,16 +49,14 @@ st.markdown("""
         }
 
         .stButton button:hover {
-            background-color: #f40612; /* Brighter red on hover */
+            background-color: #f40612;
             cursor: pointer;
         }
 
-        /* Footer Styling */
-        .footer {
-            color: #B3B3B3;
+        /* Spinner Styling */
+        .spinner {
             text-align: center;
-            margin-top: 30px;
-            font-size: 12px;
+            margin-top: 20px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -70,9 +68,6 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Main Section
-st.markdown("<div class='main'>", unsafe_allow_html=True)
-
 # Blood Donation Section
 st.markdown("""
     <div class="section">
@@ -81,12 +76,22 @@ st.markdown("""
             <strong>रक्तदान करा, जीवन वाचा!</strong><br>
             तुमचा आधार आमचं ध्येय.
         </p>
-        <div style="text-align:center; margin-top: 20px;">
-            <button>Register as a Donor</button>
-            <button>Search for Donors</button>
-        </div>
     </div>
 """, unsafe_allow_html=True)
+
+# Buttons for Dynamic Actions
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("Register as a Donor"):
+        with st.spinner("Processing your registration..."):
+            time.sleep(2)  # Simulate a loading process
+        st.success("Registration Successful!")
+
+with col2:
+    if st.button("Search for Donors"):
+        with st.spinner("Searching for donors..."):
+            time.sleep(2)  # Simulate a loading process
+        st.info("No donors found. Try again later!")
 
 # App Status Section
 st.markdown("""
@@ -96,12 +101,18 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
+# Dynamic Progress Bar
+if st.button("Show Progress"):
+    st.write("Task in progress...")
+    progress = st.progress(0)
+    for i in range(100):
+        time.sleep(0.05)  # Simulate task
+        progress.progress(i + 1)
+    st.success("Task Completed!")
+
 # Footer
 st.markdown("""
     <div class="footer">
         <p>© 2024 सामना ढोल ताशा पथक लातूर. सर्व हक्क राखीव.</p>
     </div>
 """, unsafe_allow_html=True)
-
-# End of Main Section
-st.markdown("</div>", unsafe_allow_html=True)
