@@ -1,43 +1,30 @@
 import streamlit as st
-import time
+import sqlite3
+import pandas as pd
+import plotly.express as px
 
 # Page Configuration
 st.set_page_config(page_title="सामना ढोल ताशा पथक लातूर", layout="wide")
 
-# Custom CSS for Animations and UI
+# Custom CSS for UI
 st.markdown("""
     <style>
-        /* General Background */
-        .main {
-            background-color: #121212;
-            color: #FFFFFF;
-        }
-
-        /* Header Styling */
         .main-header {
             background-color: #E50914;
             color: white;
             text-align: center;
             padding: 20px;
             border-radius: 10px;
+            margin-bottom: 20px;
         }
-
-        /* Section Styling */
         .section {
-            background-color: #1f1f1f;
-            border: 1px solid #B3B3B3;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
-            transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        .section:hover {
-            transform: scale(1.02);
-            background-color: #292929;
-        }
-
-        /* Button Styling */
         .stButton button {
             background-color: #E50914;
             color: white;
@@ -47,16 +34,9 @@ st.markdown("""
             border-radius: 5px;
             transition: background-color 0.3s ease;
         }
-
         .stButton button:hover {
-            background-color: #f40612;
+            background-color: #c40811;
             cursor: pointer;
-        }
-
-        /* Spinner Styling */
-        .spinner {
-            text-align: center;
-            margin-top: 20px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -68,51 +48,181 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Blood Donation Section
-st.markdown("""
-    <div class="section">
-        <h2>💉 रक्तदानासाठी आधुनिक सुविधा</h2>
-        <p style="text-align: center;">
-            <strong>रक्तदान करा, जीवन वाचा!</strong><br>
-            तुमचा आधार आमचं ध्येय.
-        </p>
-    </div>
-""", unsafe_allow_html=True)
+# Database Setup
+conn = sqlite3.connect('donors.db')
+c = conn.cursor()
 
-# Buttons for Dynamic Actions
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("Register as a Donor"):
-        with st.spinner("Processing your registration..."):
-            time.sleep(2)  # Simulate a loading process
-        st.success("Registration Successful!")
+# Create the table if it doesn't exist
+c.execute("""
+CREATE TABLE IF NOT EXISTS donors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    blood_group TEXT NOT NULL,
+    contact TEXT NOT NULL,
+    state TEXT NOT NULL,
+    city TEXT NOT NULL
+)
+""")
+conn.commit()
 
-with col2:
-    if st.button("Search for Donors"):
-        with st.spinner("Searching for donors..."):
-            time.sleep(2)  # Simulate a loading process
-        st.info("No donors found. Try again later!")
+# State and City Mapping
+state_city_mapping = {"Maharashtra": [
+        "Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad", "Solapur", "Kolhapur",
+        "Thane", "Amravati", "Sangli", "Jalgaon", "Nanded", "Akola", "Latur",
+        "Dhule", "Ahmednagar", "Chandrapur", "Parbhani", "Beed", "Ratnagiri",
+        "Gondia", "Wardha", "Satara", "Bhandara", "Yavatmal", "Raigad", "Palghar"
+    ],
+    "Karnataka": [
+        "Bangalore", "Mysore", "Mangalore", "Hubli", "Belgaum", "Davanagere",
+        "Bellary", "Shimoga", "Tumkur", "Bijapur", "Gulbarga", "Raichur", "Hassan"
+    ],
+    "Gujarat": [
+        "Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar",
+        "Junagadh", "Gandhinagar", "Anand", "Navsari", "Mehsana", "Morbi",
+        "Surendranagar", "Amreli", "Palanpur"
+    ],
+    "Rajasthan": [
+        "Jaipur", "Udaipur", "Jodhpur", "Kota", "Ajmer", "Bikaner", "Alwar",
+        "Bharatpur", "Sikar", "Pali", "Tonk", "Barmer", "Jhunjhunu", "Churu"
+    ],
+    "Tamil Nadu": [
+        "Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli",
+        "Erode", "Vellore", "Thoothukudi", "Dindigul", "Thanjavur", "Cuddalore",
+        "Kanchipuram", "Nagercoil", "Karur"
+    ]
 
-# App Status Section
-st.markdown("""
-    <div class="section">
-        <h3>⚙️ App Under Process</h3>
-        <p>या अॅपची निर्मिती चालू आहे. कृपया थोडा वेळ प्रतीक्षा करा.</p>
-    </div>
-""", unsafe_allow_html=True)
+}
 
-# Dynamic Progress Bar
-if st.button("Show Progress"):
-    st.write("Task in progress...")
-    progress = st.progress(0)
-    for i in range(100):
-        time.sleep(0.05)  # Simulate task
-        progress.progress(i + 1)
-    st.success("Task Completed!")
+# Sidebar for Options
+st.sidebar.header("Select an Option")
+option = st.sidebar.radio("Choose Action", ["Register as a Donor", "Search for Donors", "Data Insights"])
 
-# Footer
-st.markdown("""
-    <div class="footer">
-        <p>© 2024 सामना ढोल ताशा पथक लातूर. सर्व हक्क राखीव.</p>
-    </div>
-""", unsafe_allow_html=True)
+# Register as a Donor
+if option == "Register as a Donor":
+    st.subheader("Register as a Donor")
+    name = st.text_input("Full Name")
+    blood_group = st.selectbox("Blood Group", ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"])
+
+    # State and City Dynamic Selection
+    state = st.selectbox("Select State", list(state_city_mapping.keys()))
+    if state:
+        city = st.selectbox("Select City", state_city_mapping[state])  # Dynamically update cities
+    else:
+        city = st.selectbox("Select City", ["Please select a state first"])  # Default option if no state selected
+    
+    contact = st.text_input("Contact Number")
+    submitted = st.button("Register")
+    if submitted:
+        if name and blood_group and city and state and contact:
+            c.execute("INSERT INTO donors (name, blood_group, contact, state, city) VALUES (?, ?, ?, ?, ?)",
+                      (name, blood_group, contact, state, city))
+            conn.commit()
+            st.success("Donor Registered Successfully!")
+        else:
+            st.error("All fields are required!")
+
+
+
+# Search for Donors
+if option == "Search for Donors":
+    st.subheader("Search for Donors")
+    state_filter = st.selectbox("Select State", list(state_city_mapping.keys()))
+    if state_filter:
+        city_filter = st.selectbox("Select City", state_city_mapping[state_filter])  # Dynamically update cities
+    else:
+        city_filter = st.selectbox("Select City", ["Please select a state first"])  # Default option if no state selected
+    
+    blood_group_filter = st.selectbox("Select Blood Group", ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"])
+    if st.button("Search"):
+        query = """
+        SELECT name, blood_group, contact, city, state 
+        FROM donors 
+        WHERE state = ? AND city = ? AND blood_group = ?
+        """
+        c.execute(query, (state_filter, city_filter, blood_group_filter))
+        results = c.fetchall()
+        if results:
+            df_results = pd.DataFrame(results, columns=["Name", "Blood Group", "Contact", "City", "State"])
+            st.dataframe(df_results, use_container_width=True)
+        else:
+            st.info("No donors found for the selected criteria.")
+
+# Data Insights
+if option == "Data Insights":
+    st.subheader("Data Insights")
+    
+    # Fetch Data for City and Blood Group Distribution
+    c.execute("SELECT city, blood_group, COUNT(*) as count FROM donors GROUP BY city, blood_group")
+    city_blood_group_data = pd.DataFrame(c.fetchall(), columns=["City", "Blood Group", "Count"])
+    
+    # Fetch Data for Blood Group Distribution
+    c.execute("SELECT blood_group, COUNT(*) as count FROM donors GROUP BY blood_group")
+    blood_group_data = pd.DataFrame(c.fetchall(), columns=["Blood Group", "Count"])
+    
+    # Combined Stacked Bar Chart with Line Chart
+    st.write("### City and Blood Group Distribution (Stacked with Line)")
+    
+    if not city_blood_group_data.empty:
+        # Calculate total counts per city for the line chart
+        city_total_counts = city_blood_group_data.groupby("City")["Count"].sum().reset_index()
+
+        # Create stacked bar chart
+        fig = px.bar(
+            city_blood_group_data,
+            x="City",
+            y="Count",
+            color="Blood Group",
+            title="City and Blood Group Distribution (Stacked with Line)",
+            labels={"Count": "Donor Count"},
+            text_auto=True
+        )
+        
+        # Add line chart for total counts
+        fig.add_scatter(
+            x=city_total_counts["City"],
+            y=city_total_counts["Count"],
+            mode="lines+markers",
+            name="Total Donor Count",
+            line=dict(color='black', width=2)
+        )
+        
+        # Customize layout
+        fig.update_layout(
+            xaxis_title="City",
+            yaxis_title="Donor Count",
+            legend_title="Blood Group",
+            template="plotly_white",
+            bargap=0.3  # Adjust bar spacing
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No data available for city and blood group distribution.")
+    
+    # Blood Group Pie Chart with Count Displayed
+    st.write("### Blood Group Distribution (with Counts)")
+
+    if not blood_group_data.empty:
+        pie_chart = px.pie(
+            blood_group_data,
+            names="Blood Group",
+            values="Count",
+            title="Blood Group Distribution",
+            hole=0.3,  # To create a donut chart, optional
+            labels={"Count": "Donor Count"}
+        )
+
+        # Add count values directly to the chart
+        pie_chart.update_traces(
+            textinfo="label+value",  # Display labels and counts
+            textfont_size=14,
+            marker=dict(line=dict(color="#000000", width=1))  # Optional: outline
+        )
+
+        st.plotly_chart(pie_chart, use_container_width=True)
+    else:
+        st.info("No data available for blood group distribution.")
+
+st.write("""
+    **Note**: For issues or feedback, please contact the admin.
+""")
