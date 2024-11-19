@@ -3,37 +3,59 @@ import streamlit as st
 # Set the page configuration
 st.set_page_config(page_title="सामना ढोल ताशा पथक लातूर", layout="wide")
 
-# Custom CSS for styling
+# Add custom CSS for Netflix-like UI and animations
 st.markdown("""
     <style>
-        /* Header styling */
+        /* General Background */
+        .main {
+            background-color: #121212; /* Netflix dark background */
+            color: #FFFFFF; /* Netflix white text */
+        }
+
+        /* Header Styling */
         .main-header {
-            background-color: #004d99; /* Navy blue */
+            background-color: #E50914; /* Netflix red */
             color: white;
-            padding: 20px;
             text-align: center;
+            padding: 20px;
             border-radius: 10px;
         }
 
-        /* Subheader styling */
-        .sub-header {
-            color: #ff4d4d; /* Red */
-            font-weight: bold;
-            text-align: center;
-        }
-
-        /* Section styling */
+        /* Section Styling */
         .section {
-            background-color: #f7f7f7; /* Light gray */
-            border: 1px solid #ddd;
+            background-color: #1f1f1f; /* Darker gray for section cards */
+            border: 1px solid #B3B3B3; /* Subtle border */
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
+            transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
         }
 
-        /* Footer styling */
+        /* Section Hover Effect */
+        .section:hover {
+            transform: scale(1.02); /* Zoom effect */
+            background-color: #292929; /* Slightly brighter on hover */
+        }
+
+        /* Button Styling */
+        .stButton button {
+            background-color: #E50914;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .stButton button:hover {
+            background-color: #f40612; /* Brighter red on hover */
+            cursor: pointer;
+        }
+
+        /* Footer Styling */
         .footer {
-            color: gray;
+            color: #B3B3B3;
             text-align: center;
             margin-top: 30px;
             font-size: 12px;
@@ -48,14 +70,21 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
+# Main Section
+st.markdown("<div class='main'>", unsafe_allow_html=True)
+
 # Blood Donation Section
 st.markdown("""
     <div class="section">
-        <h2 class="sub-header">💉 रक्तदानासाठी आधुनिक सुविधा</h2>
+        <h2>💉 रक्तदानासाठी आधुनिक सुविधा</h2>
         <p style="text-align: center;">
             <strong>रक्तदान करा, जीवन वाचा!</strong><br>
             तुमचा आधार आमचं ध्येय.
         </p>
+        <div style="text-align:center; margin-top: 20px;">
+            <button>Register as a Donor</button>
+            <button>Search for Donors</button>
+        </div>
     </div>
 """, unsafe_allow_html=True)
 
@@ -73,3 +102,6 @@ st.markdown("""
         <p>© 2024 सामना ढोल ताशा पथक लातूर. सर्व हक्क राखीव.</p>
     </div>
 """, unsafe_allow_html=True)
+
+# End of Main Section
+st.markdown("</div>", unsafe_allow_html=True)
